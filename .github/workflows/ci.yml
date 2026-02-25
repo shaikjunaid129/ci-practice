@@ -1,11 +1,60 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  test:
+  build:
+    name: Install, Lint, Test, Audit
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
     steps:
-      - run: echo "CI is working"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Run Prettier check
+        run: npx prettier --check .
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test --silent
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+  auto-merge:
+    name: Auto-merge pull request when checks pass
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Merge PR
+        uses: peter-evans/merge@v3
+        with:
+          # Use the provided GITHUB_TOKEN; this will attempt to merge the PR
+          # only if all required checks have passed.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          merge-method: merge
+          # Only merge when the workflow itself is successful (job dependency)
+          # The action will fail gracefully if merge is not allowed.
+
