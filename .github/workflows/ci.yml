@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   build:
@@ -57,4 +57,3 @@ jobs:
           merge-method: merge
           # Only merge when the workflow itself is successful (job dependency)
           # The action will fail gracefully if merge is not allowed.
-

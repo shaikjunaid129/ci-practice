@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.js",
     "test": "jest --coverage",
     "lint": "eslint . --ext .js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "express": "^4.18.2"
